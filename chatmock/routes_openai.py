@@ -419,7 +419,7 @@ def completions() -> Response:
         prompt = payload.get("suffix") or ""
     stream_req = bool(payload.get("stream", False))
     stream_options = payload.get("stream_options") if isinstance(payload.get("stream_options"), dict) else {}
-    include_usage = bool(stream_options.get("include_usage", False))
+    include_usage = bool(stream_options.get("include_usage", True))
 
     messages = [{"role": "user", "content": prompt or ""}]
     input_items = convert_chat_messages_to_responses_input(messages)
