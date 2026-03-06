@@ -276,7 +276,7 @@ def chat_completions() -> Response:
     error_message: str | None = None
     usage_obj: Dict[str, int] | None = None
 
-    def _extract_usage(evt: Dict[str, Any]) -> Dict[str, int] | None:
+    def _extract_usage(evt: Dict[str, Any]) -> Dict[str, Any] | None:
         try:
             usage = (evt.get("response") or {}).get("usage")
             if not isinstance(usage, dict):
@@ -284,7 +284,25 @@ def chat_completions() -> Response:
             pt = int(usage.get("input_tokens") or 0)
             ct = int(usage.get("output_tokens") or 0)
             tt = int(usage.get("total_tokens") or (pt + ct))
-            return {"prompt_tokens": pt, "completion_tokens": ct, "input_tokens": pt, "output_tokens": ct, "total_tokens": tt}
+
+            cr = int((usage.get("input_tokens_details") or {}).get("cached_tokens") or 0)
+
+
+            return {
+                "input_tokens": pt,
+                "output_tokens": ct,
+
+                "prompt_tokens": pt,
+                "completion_tokens": ct,
+
+                "total_tokens": tt,
+
+                "prompt_tokens_details": {
+                    "cached_tokens": cr
+                },
+                "cache_read_tokens": cr,
+                "cache_creation_tokens": 0,
+            }
         except Exception:
             return None
     try:
@@ -301,6 +319,8 @@ def chat_completions() -> Response:
                 break
             try:
                 evt = json.loads(data)
+                print("IN POST /v1/chat/completions")
+                print("evt", json.dumps(evt, indent=2, ensure_ascii=False))
             except Exception:
                 continue
             kind = evt.get("type")
@@ -470,7 +490,7 @@ def completions() -> Response:
     full_text = ""
     response_id = "cmpl"
     usage_obj: Dict[str, int] | None = None
-    def _extract_usage(evt: Dict[str, Any]) -> Dict[str, int] | None:
+    def _extract_usage(evt: Dict[str, Any]) -> Dict[str, Any] | None:
         try:
             usage = (evt.get("response") or {}).get("usage")
             if not isinstance(usage, dict):
@@ -478,7 +498,23 @@ def completions() -> Response:
             pt = int(usage.get("input_tokens") or 0)
             ct = int(usage.get("output_tokens") or 0)
             tt = int(usage.get("total_tokens") or (pt + ct))
-            return {"prompt_tokens": pt, "completion_tokens": ct, "input_tokens": pt, "output_tokens": ct, "total_tokens": tt}
+            cr = int((usage.get("input_tokens_details") or {}).get("cached_tokens") or 0)
+
+            return {
+                "input_tokens": pt,
+                "output_tokens": ct,
+
+                "prompt_tokens": pt,
+                "completion_tokens": ct,
+
+                "total_tokens": tt,
+
+                "prompt_tokens_details": {
+                    "cached_tokens": cr
+                },
+                "cache_read_tokens": cr,
+                "cache_creation_tokens": 0,
+            }
         except Exception:
             return None
     try:
