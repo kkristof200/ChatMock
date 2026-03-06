@@ -382,7 +382,7 @@ def sse_translate_chat(
     vlog=None,
     reasoning_compat: str = "think-tags",
     *,
-    include_usage: bool = False,
+    include_usage: bool = True,
 ):
     response_id = "chatcmpl-stream"
     compat = (reasoning_compat or "think-tags").strip().lower()
