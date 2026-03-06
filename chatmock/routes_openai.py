@@ -284,7 +284,7 @@ def chat_completions() -> Response:
             pt = int(usage.get("input_tokens") or 0)
             ct = int(usage.get("output_tokens") or 0)
             tt = int(usage.get("total_tokens") or (pt + ct))
-            return {"prompt_tokens": pt, "completion_tokens": ct, "total_tokens": tt}
+            return {"prompt_tokens": pt, "completion_tokens": ct, "input_tokens": pt, "output_tokens": ct, "total_tokens": tt}
         except Exception:
             return None
     try:
@@ -478,7 +478,7 @@ def completions() -> Response:
             pt = int(usage.get("input_tokens") or 0)
             ct = int(usage.get("output_tokens") or 0)
             tt = int(usage.get("total_tokens") or (pt + ct))
-            return {"prompt_tokens": pt, "completion_tokens": ct, "total_tokens": tt}
+            return {"prompt_tokens": pt, "completion_tokens": ct, "input_tokens": pt, "output_tokens": ct, "total_tokens": tt}
         except Exception:
             return None
     try:
@@ -533,15 +533,15 @@ def list_models() -> Response:
     expose_variants = bool(current_app.config.get("EXPOSE_REASONING_MODELS"))
     model_groups = [
         ("gpt-5", ["high", "medium", "low", "minimal"]),
-        ("gpt-5.1", ["high", "medium", "low"]),
-        ("gpt-5.2", ["xhigh", "high", "medium", "low"]),
-        ("gpt-5.4", ["xhigh", "high", "medium", "low"]),
-        ("gpt-5.3-codex", ["xhigh", "high", "medium", "low"]),
+        ("gpt-5.1", ["high", "medium", "low", "none"]),
+        ("gpt-5.2", ["xhigh", "high", "medium", "low", "minimal", "none"]),
+        ("gpt-5.4", ["xhigh", "high", "medium", "low", "minimal", "none"]),
+        ("gpt-5.3-codex", ["xhigh", "high", "medium", "low", "minimal", "none"]),
         ("gpt-5-codex", ["high", "medium", "low"]),
         ("gpt-5.2-codex", ["xhigh", "high", "medium", "low"]),
         ("gpt-5.1-codex", ["high", "medium", "low"]),
         ("gpt-5.1-codex-max", ["xhigh", "high", "medium", "low"]),
-        ("gpt-5.1-codex-mini", []),
+        ("gpt-5.1-codex-mini", ["high", "medium", "low"]),
         ("codex-mini", []),
     ]
     model_ids: List[str] = []

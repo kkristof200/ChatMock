@@ -45,6 +45,7 @@ def normalize_model_name(name: str | None, debug_model: str | None = None) -> st
         "gpt5.2": "gpt-5.2",
         "gpt-5.2": "gpt-5.2",
         "gpt-5.2-latest": "gpt-5.2",
+        "gpt5.4": "gpt-5.4",
         "gpt-5.4": "gpt-5.4",
         "gpt-5.4-latest": "gpt-5.4",
         "gpt5.3-codex": "gpt-5.3-codex",
@@ -131,6 +132,9 @@ def start_upstream_request(
         verbose = False
     if verbose:
         _log_json("OUTBOUND >> ChatGPT Responses API payload", responses_payload)
+        ins = responses_payload.get("instructions") or ""
+        ins_len = len(ins) if isinstance(ins, str) else 0
+        print(f"OUTBOUND >> instructions length: {ins_len} chars (~{max(0, ins_len // 4)} tokens)")
 
     headers = {
         "Authorization": f"Bearer {access_token}",

@@ -396,14 +396,14 @@ def sse_translate_chat(
     ws_state: dict[str, Any] = {}
     ws_index: dict[str, int] = {}
     ws_next_index: int = 0
-    
+
     def _serialize_tool_args(eff_args: Any) -> str:
         """
         Serialize tool call arguments with proper JSON handling.
-        
+
         Args:
             eff_args: Arguments to serialize (dict, list, str, or other)
-            
+
         Returns:
             JSON string representation of the arguments
         """
@@ -413,14 +413,14 @@ def sse_translate_chat(
             try:
                 parsed = json.loads(eff_args)
                 if isinstance(parsed, (dict, list)):
-                    return json.dumps(parsed) 
+                    return json.dumps(parsed)
                 else:
-                    return json.dumps({"query": eff_args})  
+                    return json.dumps({"query": eff_args})
             except (json.JSONDecodeError, ValueError):
                 return json.dumps({"query": eff_args})
         else:
             return "{}"
-    
+
     def _extract_usage(evt: Dict[str, Any]) -> Dict[str, int] | None:
         try:
             usage = (evt.get("response") or {}).get("usage")
@@ -429,7 +429,7 @@ def sse_translate_chat(
             pt = int(usage.get("input_tokens") or 0)
             ct = int(usage.get("output_tokens") or 0)
             tt = int(usage.get("total_tokens") or (pt + ct))
-            return {"prompt_tokens": pt, "completion_tokens": ct, "total_tokens": tt}
+            return {"prompt_tokens": pt, "completion_tokens": ct, "input_tokens": pt, "output_tokens": ct, "total_tokens": tt}
         except Exception:
             return None
     try:
@@ -792,7 +792,7 @@ def sse_translate_chat(
 def sse_translate_text(upstream, model: str, created: int, verbose: bool = False, vlog=None, *, include_usage: bool = False):
     response_id = "cmpl-stream"
     upstream_usage = None
-    
+
     def _extract_usage(evt: Dict[str, Any]) -> Dict[str, int] | None:
         try:
             usage = (evt.get("response") or {}).get("usage")
@@ -801,7 +801,7 @@ def sse_translate_text(upstream, model: str, created: int, verbose: bool = False
             pt = int(usage.get("input_tokens") or 0)
             ct = int(usage.get("output_tokens") or 0)
             tt = int(usage.get("total_tokens") or (pt + ct))
-            return {"prompt_tokens": pt, "completion_tokens": ct, "total_tokens": tt}
+            return {"prompt_tokens": pt, "completion_tokens": ct, "input_tokens": pt, "output_tokens": ct, "total_tokens": tt}
         except Exception:
             return None
     try:

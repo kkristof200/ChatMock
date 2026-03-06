@@ -97,6 +97,7 @@ def ollama_tags() -> Response:
         "gpt-5",
         "gpt-5.1",
         "gpt-5.2",
+        "gpt-5.4",
         "gpt-5.3-codex",
         "gpt-5-codex",
         "gpt-5.2-codex",
@@ -108,35 +109,57 @@ def ollama_tags() -> Response:
     if expose_variants:
         model_ids.extend(
             [
+                # gpt-5 family
                 "gpt-5-high",
                 "gpt-5-medium",
                 "gpt-5-low",
                 "gpt-5-minimal",
+                # gpt-5.1 family
                 "gpt-5.1-high",
                 "gpt-5.1-medium",
                 "gpt-5.1-low",
+                "gpt-5.1-none",
+                # gpt-5.2 family
                 "gpt-5.2-xhigh",
                 "gpt-5.2-high",
                 "gpt-5.2-medium",
                 "gpt-5.2-low",
+                "gpt-5.2-minimal",
+                "gpt-5.2-none",
+                # gpt-5.4 family
+                "gpt-5.4-xhigh",
+                "gpt-5.4-high",
+                "gpt-5.4-medium",
+                "gpt-5.4-low",
+                "gpt-5.4-minimal",
+                "gpt-5.4-none",
+                # gpt-5-codex family
                 "gpt-5-codex-high",
                 "gpt-5-codex-medium",
                 "gpt-5-codex-low",
+                # gpt-5.2-codex family
                 "gpt-5.2-codex-xhigh",
                 "gpt-5.2-codex-high",
                 "gpt-5.2-codex-medium",
                 "gpt-5.2-codex-low",
+                # gpt-5.3-codex family
                 "gpt-5.3-codex-xhigh",
                 "gpt-5.3-codex-high",
                 "gpt-5.3-codex-medium",
                 "gpt-5.3-codex-low",
+                # gpt-5.1-codex family
                 "gpt-5.1-codex-high",
                 "gpt-5.1-codex-medium",
                 "gpt-5.1-codex-low",
+                # gpt-5.1-codex-max family
                 "gpt-5.1-codex-max-xhigh",
                 "gpt-5.1-codex-max-high",
                 "gpt-5.1-codex-max-medium",
                 "gpt-5.1-codex-max-low",
+                # gpt-5.1-codex-mini family
+                "gpt-5.1-codex-mini-high",
+                "gpt-5.1-codex-mini-medium",
+                "gpt-5.1-codex-mini-low",
             ]
         )
     models = []

@@ -13,6 +13,7 @@ CHATGPT_RESPONSES_URL = "https://chatgpt.com/backend-api/codex/responses"
 
 
 def _read_prompt_text(filename: str) -> str | None:
+    """Read prompt from first existing path. Returns content even if empty (no fallback to next path)."""
     candidates = [
         Path(__file__).parent.parent / filename,
         Path(__file__).parent / filename,
@@ -25,8 +26,7 @@ def _read_prompt_text(filename: str) -> str | None:
         try:
             if candidate.exists():
                 content = candidate.read_text(encoding="utf-8")
-                if isinstance(content, str) and content.strip():
-                    return content
+                return content if isinstance(content, str) else ""
         except Exception:
             continue
     return None
@@ -41,7 +41,7 @@ def read_base_instructions() -> str:
 
 def read_gpt5_codex_instructions(fallback: str) -> str:
     content = _read_prompt_text("prompt_gpt5_codex.md")
-    return content if isinstance(content, str) and content.strip() else fallback
+    return content if content is not None else fallback
 
 
 BASE_INSTRUCTIONS = read_base_instructions()
