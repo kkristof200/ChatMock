@@ -421,7 +421,12 @@ def sse_translate_chat(
         else:
             return "{}"
 
-    def _extract_usage(evt: Dict[str, Any]) -> Dict[str, int] | None:
+    def _extract_usage(evt: Dict[str, Any]) -> Dict[str, Any] | None:
+        """
+        Normalize upstream Responses API usage into an OpenAI-compatible usage object.
+        Mirrors the non-streaming logic in routes_openai.py so streaming and
+        non-streaming responses report usage in the same shape.
+        """
         try:
             usage = (evt.get("response") or {}).get("usage")
             if not isinstance(usage, dict):
@@ -429,7 +434,26 @@ def sse_translate_chat(
             pt = int(usage.get("input_tokens") or 0)
             ct = int(usage.get("output_tokens") or 0)
             tt = int(usage.get("total_tokens") or (pt + ct))
-            return {"prompt_tokens": pt, "completion_tokens": ct, "input_tokens": pt, "output_tokens": ct, "total_tokens": tt}
+            cr = int((usage.get("input_tokens_details") or {}).get("cached_tokens") or 0)
+
+            normalized = {
+                "input_tokens": pt,
+                "output_tokens": ct,
+                "prompt_tokens": pt,
+                "completion_tokens": ct,
+                "total_tokens": tt,
+                "prompt_tokens_details": {
+                    "cached_tokens": cr,
+                },
+                "cache_read_tokens": cr,
+                "cache_creation_tokens": 0,
+            }
+            if verbose and vlog:
+                try:
+                    vlog(f"CM_USAGE (stream chat) normalized usage: {json.dumps(normalized)}")
+                except Exception:
+                    pass
+            return normalized
         except Exception:
             return None
     try:
@@ -767,6 +791,11 @@ def sse_translate_chat(
                         "model": model,
                         "choices": [{"index": 0, "delta": {}, "finish_reason": "stop"}],
                     }
+                    if verbose and vlog:
+                        try:
+                            vlog("CM_USAGE (stream chat) sending final stop chunk before usage")
+                        except Exception:
+                            pass
                     yield f"data: {json.dumps(chunk)}\n\n".encode("utf-8")
                     sent_stop_chunk = True
 
@@ -780,6 +809,16 @@ def sse_translate_chat(
                             "choices": [{"index": 0, "delta": {}, "finish_reason": None}],
                             "usage": upstream_usage,
                         }
+                        if verbose and vlog:
+                            try:
+                                vlog(
+                                    "CM_USAGE (stream chat) emitting usage chunk with "
+                                    f"prompt_tokens={upstream_usage.get('prompt_tokens')} "
+                                    f"completion_tokens={upstream_usage.get('completion_tokens')} "
+                                    f"total_tokens={upstream_usage.get('total_tokens')}"
+                                )
+                            except Exception:
+                                pass
                         yield f"data: {json.dumps(usage_chunk)}\n\n".encode("utf-8")
                     except Exception:
                         pass
@@ -793,7 +832,11 @@ def sse_translate_text(upstream, model: str, created: int, verbose: bool = False
     response_id = "cmpl-stream"
     upstream_usage = None
 
-    def _extract_usage(evt: Dict[str, Any]) -> Dict[str, int] | None:
+    def _extract_usage(evt: Dict[str, Any]) -> Dict[str, Any] | None:
+        """
+        Normalize upstream Responses API usage into an OpenAI-compatible usage object
+        for text completions, matching the non-streaming logic in routes_openai.py.
+        """
         try:
             usage = (evt.get("response") or {}).get("usage")
             if not isinstance(usage, dict):
@@ -801,7 +844,26 @@ def sse_translate_text(upstream, model: str, created: int, verbose: bool = False
             pt = int(usage.get("input_tokens") or 0)
             ct = int(usage.get("output_tokens") or 0)
             tt = int(usage.get("total_tokens") or (pt + ct))
-            return {"prompt_tokens": pt, "completion_tokens": ct, "input_tokens": pt, "output_tokens": ct, "total_tokens": tt}
+            cr = int((usage.get("input_tokens_details") or {}).get("cached_tokens") or 0)
+
+            normalized = {
+                "input_tokens": pt,
+                "output_tokens": ct,
+                "prompt_tokens": pt,
+                "completion_tokens": ct,
+                "total_tokens": tt,
+                "prompt_tokens_details": {
+                    "cached_tokens": cr,
+                },
+                "cache_read_tokens": cr,
+                "cache_creation_tokens": 0,
+            }
+            if verbose and vlog:
+                try:
+                    vlog(f"CM_USAGE (stream text) normalized usage: {json.dumps(normalized)}")
+                except Exception:
+                    pass
+            return normalized
         except Exception:
             return None
     try:
@@ -865,6 +927,16 @@ def sse_translate_text(upstream, model: str, created: int, verbose: bool = False
                             "choices": [{"index": 0, "text": "", "finish_reason": None}],
                             "usage": upstream_usage,
                         }
+                        if verbose and vlog:
+                            try:
+                                vlog(
+                                    "CM_USAGE (stream text) emitting usage chunk with "
+                                    f"prompt_tokens={upstream_usage.get('prompt_tokens')} "
+                                    f"completion_tokens={upstream_usage.get('completion_tokens')} "
+                                    f"total_tokens={upstream_usage.get('total_tokens')}"
+                                )
+                            except Exception:
+                                pass
                         yield f"data: {json.dumps(usage_chunk)}\n\n".encode("utf-8")
                     except Exception:
                         pass
