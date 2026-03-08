@@ -799,9 +799,6 @@ def sse_translate_chat(
                     yield f"data: {json.dumps(chunk)}\n\n".encode("utf-8")
                     sent_stop_chunk = True
 
-                print('include_usage', include_usage)
-                print('upstream_usage', upstream_usage)
-
                 if include_usage and upstream_usage:
                     try:
                         if include_usage:
