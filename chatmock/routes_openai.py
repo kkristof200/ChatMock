@@ -115,7 +115,7 @@ def chat_completions() -> Response:
             messages.insert(0, {"role": "user", "content": content})
     is_stream = bool(payload.get("stream"))
     stream_options = payload.get("stream_options") if isinstance(payload.get("stream_options"), dict) else {}
-    include_usage = bool(stream_options.get("include_usage", False))
+    include_usage = bool(stream_options.get("include_usage", True))
 
     tools_responses = convert_tools_chat_to_responses(payload.get("tools"))
     tool_choice = payload.get("tool_choice", "auto")
@@ -319,8 +319,8 @@ def chat_completions() -> Response:
                 break
             try:
                 evt = json.loads(data)
-                print("IN POST /v1/chat/completions")
-                print("evt", json.dumps(evt, indent=2, ensure_ascii=False))
+                # print("IN POST /v1/chat/completions")
+                # print("evt", json.dumps(evt, indent=2, ensure_ascii=False))
             except Exception:
                 continue
             kind = evt.get("type")

@@ -799,8 +799,23 @@ def sse_translate_chat(
                     yield f"data: {json.dumps(chunk)}\n\n".encode("utf-8")
                     sent_stop_chunk = True
 
+                print('include_usage', include_usage)
+                print('upstream_usage', upstream_usage)
+
                 if include_usage and upstream_usage:
                     try:
+                        if include_usage:
+                            chunk = {
+                                "id": response_id,
+                                "object": "chat.completion.chunk",
+                                "created": created,
+                                "model": model,
+                                "choices": [],
+                                "usage": upstream_usage
+                            }
+
+                            yield f"data: {json.dumps(chunk)}\n\n".encode("utf-8")
+
                         usage_chunk = {
                             "id": response_id,
                             "object": "chat.completion.chunk",
@@ -828,7 +843,7 @@ def sse_translate_chat(
         upstream.close()
 
 
-def sse_translate_text(upstream, model: str, created: int, verbose: bool = False, vlog=None, *, include_usage: bool = False):
+def sse_translate_text(upstream, model: str, created: int, verbose: bool = False, vlog=None, *, include_usage: bool = True):
     response_id = "cmpl-stream"
     upstream_usage = None
 
